@@ -1,7 +1,5 @@
 #!/bin/bash
 
-cd ./GPLVM_Shaista/example_scripts
-
 script_call='python ./example_scripts/argparse_example.py --help'
 team_name=team205
 
