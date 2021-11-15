@@ -19,7 +19,7 @@ h5ad_file = args.filepath
 celltype_col = args.celltype_column
 
 ## Your script starts here ##
-adata = sc.read_h5ad(filepath)
+adata = sc.read_h5ad(h5ad_file)
 adata.obs['annotation'] = adata.obs[celltype_col]
-output_filepath = filepath.split('.h5ad')[0] + ".cleaned.h5ad"
-sc.write_h5ad(output_filepath)
+output_h5ad_file = h5ad_file.split('.h5ad')[0] + ".cleaned.h5ad"
+sc.write_h5ad(output_h5ad_file)
