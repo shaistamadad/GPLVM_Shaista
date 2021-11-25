@@ -18,7 +18,7 @@ Then reload the browser tab of JupyterLab to see the new environment in the list
 
 Model document is at https://www.overleaf.com/project/605e07104b6c6221cfa7a557
 
-Code Organisation:
+# Code Organisation:
 
 The file TrainFunction.py contains two functions: run_model and run_model_randomInit to train an anndata object with 1 to 7 PC components or random values values. TrainFunction.py requires GPLVM model classes from file model.py.
 
