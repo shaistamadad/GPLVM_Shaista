@@ -61,18 +61,18 @@ if args.input == 'pbmc':
 #     input_h5ad = args.input
 #     adata = read_h5ad(input_h5ad)
 
-print(type(args.input))
+#print(type(args.input))
 
 torch.manual_seed(42)
 if args.initialisation=='random':
     
     Trained=run_model_randomInit(adata)
-    Trained.write_h5ad('/home/jupyter/mount/gdrive/BGPLVM_scRNA/' + args.output + '.h5ad') 
+    Trained.write_h5ad('/home/jupyter/GPLVM_Shaista/TrainedModels/' + args.output + '.h5ad') 
 
 if   args.initialisation=='PCA':
 
     Trained=run_model(adata)
-    Trained.write_h5ad('/home/jupyter/mount/gdrive/BGPLVM_scRNA/' + args.output + '.h5ad')
+    Trained.write_h5ad('/home/jupyter/GPLVM_Shaista/TrainedModels/' + args.output + '.h5ad')
 
 
 
