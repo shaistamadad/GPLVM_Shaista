@@ -161,6 +161,27 @@ def plot_cormap(adata,PCs):
     
     return 
 
+# %%
+
+def CorrelationScores(adata,PCs):
+    '''
+    returns the correlation scores for PCs versus latent variable dimensions 
+    '''
+    X_lv = adata.obsm["X_BGPLVM_latent"].copy()
+    X_pc = adata.obsm["X_pca"].copy()
+
+    n_pcs = PCs
+    n_gplvm_dims = X_lv.shape[1]
+    
+    cormat = np.corrcoef(X_lv.T, X_pc[:,0:n_pcs].T)
+
+    pcVSlv_cormat = cormat[0:n_gplvm_dims,n_gplvm_dims:n_gplvm_dims+n_pcs]
+    array=pcVSlv_cormat[:,1:]
+    
+    return array.diagonal()
+
+
+
 
 # %%
 
@@ -249,5 +270,35 @@ def run_model_randomInit(adata):
     return trained_adata
 
 
+def plot_umap(adata,adata_random):
+    '''
+    plots umaps based on the GP(random-init), GP(PCA-init) and PC components, takes as input adata objects with trained GP models 
+    based on PC and random initialisation respectively 
+    '''
+    #del adata.obsm['X_umap'] #delete exisiting UMAPs
+    #del adata_random.obsm['X_umap']
+    
+    sc.pp.neighbors(adata, use_rep="X_pca", key_added='PCA') #use_rep=any values from obsm
+    sc.tl.umap(adata,neighbors_key='PCA')
+    adata.obsm["X_umap_pca"] = adata.obsm["X_umap"].copy()
+    
+    sc.pp.neighbors(adata_random, use_rep="X_BGPLVM_latent", key_added='gplvm_random') 
+    sc.tl.umap(adata_random, neighbors_key='gplvm_random')
+    adata.obsm["X_umap_gplvm_random"] = adata_random.obsm["X_umap"].copy()
+    adata_random.obsm["X_umap_gplvm_rand"] = adata_random.obsm["X_umap"].copy()
 
+    sc.pp.neighbors(adata, use_rep="X_BGPLVM_latent", key_added='gplvm_PCA') 
+    sc.tl.umap(adata, neighbors_key='gplvm_PCA')
+    adata.obsm["X_umap_gplvm_PC"] = adata.obsm["X_umap"].copy()
+
+    
+    sc.tl.leiden(adata, neighbors_key='gplvm_PCA', key_added='clusters_gplvm_PcaInit')
+    sc.tl.leiden(adata_random, neighbors_key='gplvm_random', key_added='clusters_gplvm_randomInit')
+    sc.tl.leiden(adata, neighbors_key='PCA', key_added='clusters_PC')
+    adata.obs["clusters_gplvm_randomInit"] = adata_random.obs["clusters_gplvm_randomInit"].copy()
+
+
+
+    
+    return adata
 
