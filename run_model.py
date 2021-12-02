@@ -26,7 +26,7 @@ import argparse
 
 parser= argparse.ArgumentParser(description='This script take an anndata object as input and trains the GPLVM model on the input returning an anndata object with the latent variable embedding ')
 parser.add_argument('input', type=str,
-                 help=' the input anndata object.Choose one of the six  options: bonemarrow, forebrain, gastrulation,iPSC, pancreas,pbmc. Or else give the path to the anndata object you want to train' )
+                 help=' the input anndata object.Choose one of the six  options: bonemarrow, forebrain, gastrulation,iPSC, pancreas,pbmc10k. Or else give the path to the anndata object you want to train' )
 
 parser.add_argument('initialisation', type= str,
                  help='choose either random or PCA as the initialisation for the latent variable matrix')
@@ -54,10 +54,12 @@ if args.input == 'iPSC':
 if args.input == 'pancreas': 
     adata= scv.datasets.pancreas()  
 
-if args.input == 'pbmc': 
-    adata= scv.datasets.pbmc68k()  
+if args.input == 'pbmc10k': 
+    adata = read_h5ad('/home/jupyter/mount/gdrive/BridgeIntegrationData/Data/pbmc10k.h5ad')
 
-# else: 
+ 
+
+ # else: 
 #     input_h5ad = args.input
 #     adata = read_h5ad(input_h5ad)
 
