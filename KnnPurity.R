@@ -22,12 +22,12 @@ knn_purity <- function(embeddings, clusters, k = 100) {
 library(SeuratDisk)
 
 Convert("/home/jovyan/GPLVM_Shaista/TrainedModels/gastrulation_PCA.h5ad", ".h5seurat")
-Convert("/home/jovyan/GPLVM_Shaista/TrainedModels/gastrulation_randomInit.h5ad", ".h5seurat")
+Convert("/home/jovyan/GPLVM_Shaista/TrainedModels/gastrulation_random.h5ad", ".h5seurat")
 # This creates a copy of this .h5ad object reformatted into .h5seurat inside the example_dir directory
 
 # This .d5seurat object can then be read in manually
 gastrulation <- LoadH5Seurat("/home/jovyan/GPLVM_Shaista/TrainedModels/gastrulation_PCA.h5Seurat")
-gastrulation_random <-LoadH5Seurat("/home/jovyan/GPLVM_Shaista/TrainedModels/gastrulation_randomInit.h5Seurat")
+gastrulation_random <-LoadH5Seurat("/home/jovyan/GPLVM_Shaista/TrainedModels/gastrulation_random.h5Seurat")
 
 
 # Get embeddings for the three methods: PCA, gplvm_PCAinit and gplvm_randomIni
@@ -67,6 +67,8 @@ for (i in seq_along(purity_list)) {
   knn_df <- rbind(knn_df, dft)
 }
 
+
+savRDS(knn_df,'/barplots_knnpurity.rds')
 
  ggplot(
   data = knn_df,
