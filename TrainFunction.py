@@ -14,7 +14,7 @@ import gpytorch
 import scanpy as sc
 import scipy.sparse as sp
 import sys  #sys and os 
-sys.path.append('/home/jupyter/BGPLVM_scRNA/')
+sys.path.append('/home/jovyan/BGPLVM_scRNA/')#sys.path.append('/home/jupyter/BGPLVM_scRNA/') #path to models file 
 import model
 from model import GPLVM, PointLatentVariable, GaussianLikelihood, train
 import matplotlib.pyplot as plt
@@ -176,12 +176,38 @@ def CorrelationScores(adata,PCs):
     cormat = np.corrcoef(X_lv.T, X_pc[:,0:n_pcs].T)
 
     pcVSlv_cormat = cormat[0:n_gplvm_dims,n_gplvm_dims:n_gplvm_dims+n_pcs]
-    array=pcVSlv_cormat[:,1:]
+    pcVSlv_cormat = cormat[0:n_gplvm_dims,n_gplvm_dims:n_gplvm_dims+n_pcs]
+    array= np.amax(pcVSlv_cormat, axis=1)
+#     sns.heatmap(pcVSlv_cormat, cmap="RdBu_r", vmax=1, vmin=-1);
+#     plt.xlabel('PCs');
+#     plt.ylabel("GPLVM Variables")
     
-    return array.diagonal()
+    return array
 
 
 
+def CorrelationScores_PT(adata,PCs):
+    '''
+    returns the correlation scores for PCs versus latent variable dimensions including psudotime 
+    '''
+    X_lv = adata.obsm["X_BGPLVM_latent"].copy()
+    S=np.array(adata.obs['cellcycle_pseudotime'].copy())
+    SS= np.reshape(S, (S.size, 1)) #convert into a two-D array
+    X_lv_PT= np.append(SS,X_lv, axis=1)
+    X_pc = adata.obsm["X_pca"].copy()
+
+    n_pcs = PCs
+    n_gplvm_dims = X_lv_PT.shape[1]
+    
+    cormat = np.corrcoef(X_lv_PT.T, X_pc[:,0:n_pcs].T)
+
+    pcVSlv_cormat = cormat[0:n_gplvm_dims,n_gplvm_dims:n_gplvm_dims+n_pcs]
+    array= np.amax(pcVSlv_cormat, axis=1)
+#     sns.heatmap(pcVSlv_cormat, cmap="RdBu_r", vmax=1, vmin=-1);
+#     plt.xlabel('PCs');
+#     plt.ylabel("GPLVM Variables")
+    
+    return array
 
 # %%
 
@@ -301,4 +327,6 @@ def plot_umap(adata,adata_random):
 
     
     return adata
+
+
 
