@@ -1,0 +1,94 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+
+```{r}
+library(readr)
+knnPurity <- read_csv("GPLVM_Shaista/knnPurity.csv")
+NMI_ARI<-read_csv("GPLVM_Shaista/ARI_NMI.csv")
+```
+
+```{r}
+library(patchwork)
+library(tidyverse)
+NMI <- NMI_ARI %>%
+    filter(Metric=="NMI")
+RandScore <- NMI_ARI %>%
+    filter(Metric=="ARI")
+```
+
+
+
+```{r}
+knn_plot=ggplot(
+  data =knnPurity,
+  mapping = aes(x = as.factor(condition), y = knn, fill = dataset)) +
+  geom_boxplot(outlier.shape = NA) +
+    stat_summary(fun.y="mean", color="black", shape=15) +
+      theme_classic() + 
+    scale_x_discrete(limits = levels(knnPurity$dataset)) +
+      ylab("KNN purity") +
+    xlab("Condition")
+```
+
+
+```{r}
+knn_plot
+```
+
+
+
+
+```{r}
+p1=ggplot(RandScore, aes(condition,score, fill=dataset))+
+  geom_col(position="dodge") +
+  labs(title="Adjusted Rand Score",
+        x="Condition", y= "Score")
+     p2=ggplot(NMI, aes(condition,score, fill=dataset))+
+  geom_col(position="dodge") +
+  labs(title="NMI",
+        x="Condition", y= "Score")
+```
+
+```{r}
+library(ggpubr)
+NMI_ARIPlot=ggarrange(p1, p2, ncol=2, nrow=2, common.legend = TRUE, legend="top")
+```
+
+
+
+
+
+
+
+
+```{r}
+ S=ggarrange(NMI_ARIPlot, knn_plot, 
+           labels = c("A", "B"),
+           ncol = 1, nrow = 2, heights = c(2,1), 
+           hjust = -0.5,
+  vjust = 1)
+```
+
+
+
+
+```{r}
+library(ggpubr)
+png(file = "/home/jovyan/GPLVM_Shaista/Figure2.png",width=600, height=350) 
+S
+ 
+dev.off()
+```
+
+
+```{r}
+
+```
+
+
