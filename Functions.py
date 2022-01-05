@@ -3,7 +3,6 @@
 # %%
 
 # %%
-
 import scipy
 import os, torch
 import numpy as np
@@ -227,12 +226,15 @@ def plot_cormap(adata,PCs):
     show a correlation heatmap between the latent variables (excluding the cell cycle and the PCs
     '''
     X_lv = adata.obsm["X_BGPLVM_latent"].copy()
+    S=np.array(adata.obs['cellcycle_pseudotime'].copy())
+    SS= np.reshape(S, (S.size, 1)) #convert into a two-D array
+    X_lv_PT= np.append(SS,X_lv, axis=1)
     X_pc = adata.obsm["X_pca"].copy()
 
     n_pcs = PCs
-    n_gplvm_dims = X_lv.shape[1]
+    n_gplvm_dims = X_lv_PT.shape[1]
     
-    cormat = np.corrcoef(X_lv.T, X_pc[:,0:n_pcs].T)
+    cormat = np.corrcoef(X_lv_PT.T, X_pc[:,0:n_pcs].T)
 
     pcVSlv_cormat = cormat[0:n_gplvm_dims,n_gplvm_dims:n_gplvm_dims+n_pcs]
     sns.heatmap(pcVSlv_cormat, cmap="RdBu_r", vmax=1, vmin=-1);
@@ -243,26 +245,29 @@ def plot_cormap(adata,PCs):
 
 # %%
 
-def CorrelationScores(adata,PCs):
+def Heatmap(adata,PCs):
     '''
     returns the correlation scores for PCs versus latent variable dimensions 
     '''
     X_lv = adata.obsm["X_BGPLVM_latent"].copy()
+    S=np.array(adata.obs['cellcycle_pseudotime'].copy())
+    SS= np.reshape(S, (S.size, 1)) #convert into a two-D array
+    X_lv_PT= np.append(SS,X_lv, axis=1)
     X_pc = adata.obsm["X_pca"].copy()
 
     n_pcs = PCs
-    n_gplvm_dims = X_lv.shape[1]
+    n_gplvm_dims = X_lv_PT.shape[1]
     
-    cormat = np.corrcoef(X_lv.T, X_pc[:,0:n_pcs].T)
+    cormat = np.corrcoef(X_lv_PT.T, X_pc[:,0:n_pcs].T)
 
     pcVSlv_cormat = cormat[0:n_gplvm_dims,n_gplvm_dims:n_gplvm_dims+n_pcs]
     pcVSlv_cormat = cormat[0:n_gplvm_dims,n_gplvm_dims:n_gplvm_dims+n_pcs]
-    array= np.amax(pcVSlv_cormat, axis=1)
-#     sns.heatmap(pcVSlv_cormat, cmap="RdBu_r", vmax=1, vmin=-1);
-#     plt.xlabel('PCs');
-#     plt.ylabel("GPLVM Variables")
+    # array= np.amax(pcVSlv_cormat, axis=1)
+    sns.heatmap(pcVSlv_cormat, cmap="RdBu_r", vmax=1, vmin=-1);
+    plt.xlabel('PCs');
+    plt.ylabel("GPLVM Variables")
     
-    return array
+    return 
 
 
 
@@ -427,9 +432,10 @@ def proliferation_purity(adata, X_dim_red, gene_name, k=100):
         df[col] = df[col].apply(lambda x: expression(x))
     proliferation_status=df[gene_name]
     proliferation_status=proliferation_status.to_numpy()
+    adata.obs[gene_name]=proliferation_status
     #proliferation_status
 
-    adata.obs['proliferation_purity_' + X_dim_red] = np.nan
+    # adata.obs['proliferation_purity_' + X_dim_red] = np.nan
 
     for i in range(bin_knn_mat.shape[0]):
             nn_labels = proliferation_status[bin_knn_mat[i,:].flatten()==1]

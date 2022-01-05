@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-from Function import run_model, run_model_randomInit
+from Functions import run_model, run_model_randomInit
 import scvelo as scv
 import scipy
 import os, torch
@@ -74,7 +74,7 @@ if args.initialisation=='random':
     Trained=run_model_randomInit(adata)
     # Trained.__dict__['_raw'].__dict__['_var']=\
     #                              Trained.__dict__['_raw'].__dict__['_var'].rename(columns={'_index': 'features'})
-    Trained.write_h5ad('/home/jupyter/GPLVM_Shaista/TrainedModels/Scaled/' + args.output + '.h5ad') 
+    Trained.write_h5ad('/home/jupyter/GPLVM_Shaista/TrainedModels/' + args.output + '.h5ad') 
 
 if   args.initialisation=='PCA':
 
@@ -83,7 +83,7 @@ if   args.initialisation=='PCA':
     # Trained.__dict__['_raw'].__dict__['_var']=\
     #                                         Trained.__dict__['_raw'].__dict__['_var'].rename(columns={'_index': 'features'})
     
-    Trained.write_h5ad('/home/jupyter/GPLVM_Shaista/TrainedModels/Scaled/' + args.output + '.h5ad')
+    Trained.write_h5ad('/home/jupyter/GPLVM_Shaista/TrainedModels/' + args.output + '.h5ad')
 
 
 

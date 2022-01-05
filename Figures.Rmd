@@ -1,0 +1,453 @@
+---
+title: "R Notebook"
+output:
+  html_document:
+    df_print: paged
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+
+```{r}
+library(readr)
+library("png")
+library(ggplot2)
+knnPurity <- read_csv("GPLVM_Shaista/Knn_purity.csv")
+CC_Purity<-read_csv("GPLVM_Shaista/CC_Purity.csv")
+NMI_ARI<-read_csv("GPLVM_Shaista_old/ARI_NMI-2.csv")
+Correlation_Scaled=read_csv("GPLVM_Shaista/Correlation_Scaled.csv")
+Correlation_Unscaled=read_csv("GPLVM_Shaista/Correlation_Unscaled.csv")
+Correlation=read_csv("GPLVM_Shaista/Correlation_analysis.csv")
+```
+
+
+```{r}
+Correlation_Scaled$Scaled= "Yes"
+Correlation_Unscaled$Scaled= "No"
+Cor= rbind(Correlation_Scaled, Correlation_Unscaled)
+```
+
+```{r}
+Figure1A=ggplot(
+  data =Correlation,
+  mapping = aes(x = as.factor(dataset), y = Correlation, fill = Init)) +
+  geom_boxplot(outlier.shape = NA) +
+    # stat_summary(fun.y="mean", color="black", shape=15) +
+      theme_classic() + 
+      ylab("Score") +
+    xlab("Condition") +
+  ggtitle("Distribution of best correlation scores between LVs and PCs")
+
+Figure1A
+```
+
+
+```{r}
+base <- ggplot(
+  data =Cor,
+  mapping = aes(x = as.factor(dataset), y = Correlation, fill = Scaled)) +
+  geom_boxplot(outlier.shape = NA) +
+    # stat_summary(fun.y="mean", color="black", shape=15) +
+      theme_classic() + 
+    scale_x_discrete(limits = levels(knnPurity$dataset)) +
+      ylab("Score") +
+    xlab("dataset")  
+base + facet_wrap(~Init, ncol = 2)
+Correlation_Fig= base + facet_wrap(~Init, ncol = 2)
+png(file = "/home/jovyan/GPLVM_Shaista/Correlation.png",width=1000, height=350) 
+Correlation_Fig
+ 
+dev.off()
+```
+
+
+```{r}
+library(patchwork)
+library(tidyverse)
+NMI <- NMI_ARI %>%
+    filter(Metric=="NMI")
+RandScore <- NMI_ARI %>%
+    filter(Metric=="ARI")
+```
+
+
+
+
+
+```{r}
+correlation_plot=ggplot(
+  data =knnPurity,
+  mapping = aes(x = as.factor(dataset), y = knn, fill = condition)) +
+  geom_boxplot(outlier.shape = NA) +
+    # stat_summary(fun.y="mean", color="black", shape=15) +
+      theme_classic() + 
+    scale_x_discrete(limits = levels(knnPurity$dataset)) +
+      ylab("KNN purity") +
+    xlab("Condition") 
+```
+
+```{r}
+knnPurity$condition <- factor(knnPurity$condition  , levels=c("PCA", "gplvm_PCA", "gplvm_random"))
+knn_plot=ggplot(
+  data =knnPurity,
+  mapping = aes(x = as.factor(dataset), y = knn, fill = condition)) +
+  geom_boxplot(outlier.shape = NA) +
+    # stat_summary(fun.y="mean", color="black", shape=15) +
+      theme_classic() + 
+    scale_x_discrete(limits = levels(knnPurity$dataset)) +
+      ylab("KNN purity") +
+    xlab("Condition") 
+  #ggsave('path/to/fig/figure.png', height=6, widths=10,  )
+CC_Purity$condition <- factor(CC_Purity$condition  , levels=c("PCA", "gplvm_PCA", "gplvm_random"))
+ccn_plot=ggplot(
+  data =CC_Purity,
+  mapping = aes(x = as.factor(dataset), y = score, fill = condition)) +
+  geom_boxplot(outlier.shape = NA) +
+    # stat_summary(fun.y="mean", color="black", shape=15) +
+      theme_classic() + 
+    scale_x_discrete(limits = levels(knnPurity$dataset)) +
+      ylab("KNN purity") +
+    xlab("Condition") 
+
+```
+
+
+```{r}
+CC_Purity$condition <- factor(CC_Purity$condition  , levels=c("PCA", "gplvm_PCA", "gplvm_random"))
+CC_Purity$Gene <- factor(CC_Purity$Gene  , levels=c("PLK1", "CENPF", "CDK1", "TOP2A"))
+
+ggplot(
+  data =CC_Purity,
+  mapping = aes(x = as.factor(dataset), y = score, fill = condition)) +
+  geom_boxplot(outlier.shape = NA) +
+    # stat_summary(fun.y="mean", color="black", shape=15) +
+      theme_classic() + 
+    scale_x_discrete(limits = levels(knnPurity$dataset)) +
+      ylab("proliferation purity") +
+    xlab("dataset")  + coord_cartesian(ylim=c(0,1))
+```
+```{r}
+CC_Purity$condition=  factor(CC_Purity$condition  , levels=c("PCA", "gplvm_PCA", "gplvm_random"))
+```
+
+```{r}
+base <- ggplot(
+  data =CC_Purity,
+  mapping = aes(x = as.factor(dataset), y = score, fill = condition)) +
+  geom_boxplot(outlier.shape = NA) +
+    # stat_summary(fun.y="mean", color="black", shape=15) +
+      theme_classic() + 
+    scale_x_discrete(limits = levels(knnPurity$dataset)) +
+      ylab("ccn purity") +
+    xlab("dataset")  + coord_cartesian(ylim=c(0,1))
+base + facet_wrap(~Gene, ncol = 2)
+CCP= base + facet_wrap(~Gene, ncol = 2)
+library(ggpubr)
+png(file = "/home/jovyan/GPLVM_Shaista/CellCyle.png",width=1000, height=350) 
+CCP
+ 
+dev.off()
+```
+
+
+```{r}
+RandScore$condition <- factor(RandScore$condition  , levels=c("pca", "gplvm_init", "random_init"))
+p1=ggplot(RandScore, aes(dataset,score, fill=condition))+
+  geom_col(position="dodge") +
+  labs(title="Adjusted Rand Score",
+        x="Condition", y= "Score")
+NMI$condition <- factor(NMI$condition  , levels=c("pca", "gplvm_init", "random_init"))
+
+     p2=ggplot(NMI, aes(dataset,score, fill=condition))+
+  geom_col(position="dodge") +
+  labs(title="NMI",
+        x="Condition", y= "Score")
+```
+
+```{r}
+NMI_ARI$condition <- factor(NMI_ARI$condition  , levels=c("pca", "gplvm_init", "random_init"))
+base <- ggplot(
+  data =NMI_ARI,
+  mapping = aes(x = as.factor(dataset), y = score, fill = condition)) +
+   geom_col(position="dodge") +
+      theme_classic() 
+    
+base + facet_wrap(~Metric, ncol = 2)
+```
+
+
+```{r}
+library (ggpubr)
+NMI_ARIPlot= ggarrange(p1, p2, ncol = 2, nrow = 1)
+```
+
+
+```{r}
+#install.packages("png")                       # Install & load png
+library("png")
+
+my_image1 <-  readPNG("/home/jovyan/GPLVM_Shaista/UMAPs.png")
+```
+
+
+```{r}
+library(grid)                       # Create example data
+data <- data.frame(x = rnorm(1000),
+                   y = rnorm(1000))
+my_image_mod11 <- ggplot(data, aes(x, y)) +    # Modify image file
+  geom_point(col = "white") +
+  theme_void() +
+  annotation_custom(rasterGrob(my_image1, width = 1, height = 1),
+                    xmin = - Inf, xmax = Inf,
+                    ymin = - Inf, ymax = Inf)
+
+my_image_mod1<- ggplot(data, aes(x, y)) +    # Modify image file
+  geom_point(col = "white") +
+  theme_void() +
+  annotation_custom(rasterGrob(my_image1, width = 1, height = 1),
+                    xmin = - Inf, xmax = Inf,
+                    ymin = - Inf, ymax = Inf)
+```
+
+
+
+
+
+```{r}
+ S=ggarrange(Figure1A,my_image_mod1, NMI_ARIPlot, knn_plot,
+           labels = c("A", "B", "C", "D"),
+           ncol = 1, nrow = 4, heights = c(2,1,1,1), 
+           hjust = -0.5,
+  vjust = 1)
+```
+
+
+
+
+```{r}
+library(ggpubr)
+png(file = "/home/jovyan/GPLVM_Shaista/Figure2.png",width=800, height=1000) 
+S
+ 
+dev.off()
+```
+
+
+```{r}
+S
+```
+
+
+```{r}
+ggsave('Fig.png',S,height=6 )
+```
+https://statisticsglobe.com/insert-png-image-between-ggplot2-axis-positions-in-r
+
+
+```{r}
+
+base =ggplot(CC_Purity,
+  mapping = aes(x = as.factor(dataset), y = score, fill = condition)) +
+  geom_boxplot(outlier.shape = NA) +
+    # stat_summary(fun.y="mean", color="black", shape=15) +
+      theme_classic() + 
+    scale_x_discrete(limits = levels(knnPurity$dataset)) +
+      ylab("ccn purity") +
+    xlab("Condition") 
+S=base + facet_wrap(~Gene, ncol = 2)
+```
+
+
+```{r}
+pseudotimeVsgeneexp= readPNG("/home/jovyan/GPLVM_Shaista/CellCycleVsGeneExpression.png")
+pseudotime= readPNG("/home/jovyan/GPLVM_Shaista/Pseudotime_Expression.png")
+cdk1_genexpression= readPNG("/home/jovyan/GPLVM_Shaista/CDK1_Expression.png")
+set.seed(769534)                              # Create example data
+data <- data.frame(x = rnorm(1000),
+                   y = rnorm(1000))
+my_image_mod1111 <- ggplot(data, aes(x, y)) +    # Modify image file
+  geom_point(col = "white") +
+  theme_void() +
+  annotation_custom(rasterGrob(pseudotimeVsgeneexp, width = 1, height = 1),
+                    xmin = - Inf, xmax = Inf,
+                    ymin = - Inf, ymax = Inf)
+my_image_mod11111 <- ggplot(data, aes(x, y)) +    # Modify image file
+  geom_point(col = "white") +
+  theme_void() +
+  annotation_custom(rasterGrob(pseudotime, width = 1, height = 1),
+                    xmin = - Inf, xmax = Inf,
+                    ymin = - Inf, ymax = Inf)
+
+my_image_mod111111 <- ggplot(data, aes(x, y)) +    # Modify image file
+  geom_point(col = "white") +
+  theme_void() +
+  annotation_custom(rasterGrob(cdk1_genexpression, width = 1, height = 1),
+                    xmin = - Inf, xmax = Inf,
+                    ymin = - Inf, ymax = Inf)
+```
+
+
+```{r}
+ Figure3=ggarrange(my_image_mod1111, my_image_mod11111, my_image_mod111111,CCP,
+           labels = c("A", "B", "C", "D"),
+           ncol = 1, nrow = 4, heights = c(2,1,1,2), 
+           hjust = -0.5,
+  vjust = 1)
+Figure3
+```
+
+```{r}
+library(ggpubr)
+png(file = "/home/jovyan/GPLVM_Shaista/Figure3.png",width=800, height=800) 
+Figure3
+ 
+dev.off()
+```
+
+
+
+```{r}
+
+image1= readPNG("/home/jovyan/GPLVM_Shaista/KnnVsCcn_CDK1.png")
+image2= readPNG("/home/jovyan/GPLVM_Shaista/KnnVsCcn_CENPF.png")
+```
+
+
+```{r}
+set.seed(769534)                              # Create example data
+data <- data.frame(x = rnorm(1000),
+                   y = rnorm(1000))
+my_image_mod11 <- ggplot(data, aes(x, y)) +    # Modify image file
+  geom_point(col = "white") +
+  theme_void() +
+  annotation_custom(rasterGrob(image1, width = 1, height = 1),
+                    xmin = - Inf, xmax = Inf,
+                    ymin = - Inf, ymax = Inf)
+
+my_image_mod111 <- ggplot(data, aes(x, y)) +    # Modify image file
+  geom_point(col = "white") +
+  theme_void() +
+  annotation_custom(rasterGrob(image2, width = 1, height = 1),
+                    xmin = - Inf, xmax = Inf,
+                    ymin = - Inf, ymax = Inf)
+```
+
+```{r}
+ SS=ggarrange(my_image_mod11, my_image_mod111,
+           labels = c("A", "B"),
+           ncol = 1, nrow = 2, heights = c(1,1), 
+           hjust = -0.5,
+  vjust = 1)
+SS
+```
+
+
+```{r}
+library(ggpubr)
+png(file = "/home/jovyan/GPLVM_Shaista/Figure4.png",width=800, height=800) 
+SS
+ 
+dev.off()
+```
+
+```{r}
+ggsave('CellCycle.png',S,height=6 )
+```
+
+
+
+
+```{r}
+knnPurity_scaled <- read_csv("GPLVM_Shaista/Knn_purity_Scaled.csv")
+knnPurity_Unscaled <- read_csv("GPLVM_Shaista/Knn_purity_unscaled-2.csv")
+
+
+```
+
+
+
+```{r}
+all(knnPurity_scaled$knn== knnPurity_Unscaled$knn)
+
+```
+
+
+```{r}
+knnPurity_scaled$condition <- factor(knnPurity_scaled$condition  , levels=c("PCA", "gplvm_PCA", "gplvm_random"))
+
+knnPurity_scaled$PCAScaled= "Yes"
+#df1= knnPurity_scaled[!(knnPurity_scaled$condition=="PCA"),]
+knnPurity$PCAScaled= "No"
+knnPurity_Unscaled$PCAScaled= "No"
+df2<-knnPurity[!(knnPurity$dataset=='gastrulation'),]
+Cor= rbind(knnPurity_scaled, df2)
+```
+
+
+
+```{r}
+#when PCA is scaled versus PCA is unscaled while Y is scaled in both cases 
+base <- ggplot(
+  data =Cor,
+  mapping = aes(x = as.factor(dataset), y = knn, fill = PCAScaled)) +
+  geom_boxplot(outlier.shape = NA) +
+    # stat_summary(fun.y="mean", color="black", shape=15) +
+      theme_classic() + 
+    scale_x_discrete(limits = levels(knnPurity_scaled$dataset)) +
+      ylab("Score") +
+    xlab("dataset")  
+Figure1B=base + facet_wrap(~condition, ncol = 3)
+Figure1B
+```
+
+
+```{r}
+#when PCA is unscaled 
+knnPurity$YScaled= "Yes"
+knnPurity_Unscaled$YScaled= "No"
+df1= knnPurity_Unscaled[!(knnPurity_Unscaled$condition=="PCA"),]
+df2<-knnPurity[!(knnPurity$dataset=='gastrulation'| knnPurity$condition=="PCA"),]
+Cor= rbind(df1
+           , df2)
+```
+
+```{r}
+base <- ggplot(
+  data =Cor,
+  mapping = aes(x = as.factor(dataset), y = knn, fill = YScaled)) +
+  geom_boxplot(outlier.shape = NA) +
+    # stat_summary(fun.y="mean", color="black", shape=15) +
+      theme_classic() + 
+    scale_x_discrete(limits = levels(knnPurity_scaled$dataset)) +
+      ylab("Score") +
+    xlab("dataset")  
+Figure1C=base + facet_wrap(~condition, ncol = 2)
+Figure1C
+```
+
+
+
+
+
+
+
+```{r}
+ Figure1=ggarrange(Correlation_Fig, Figure1B, Figure1C,
+           labels = c("A", "B", "C"),
+           ncol = 1, nrow = 3, heights = c(1,1,1), 
+           hjust = -0.5,
+  vjust = 1)
+ Figure1
+```
+
+
+
+
+```{r}
+library(ggpubr)
+png(file = "/home/jovyan/GPLVM_Shaista/ScaledvsUnscaled.png",width=800, height=1000) 
+Figure1
+ 
+dev.off()
+```
