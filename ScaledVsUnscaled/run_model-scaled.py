@@ -74,16 +74,16 @@ if args.initialisation=='random':
     Trained=run_model_randomInit(adata)
     # Trained.__dict__['_raw'].__dict__['_var']=\
     #                              Trained.__dict__['_raw'].__dict__['_var'].rename(columns={'_index': 'features'})
-    Trained.write_h5ad('/home/jupyter/GPLVM_Shaista/TrainedModels/Scaled/' + args.output + '.h5ad') 
+    Trained.write_h5ad('/home/jupyter/GPLVM_Shaista/ScaledVsUnscaled/Scaled/' + args.output + '.h5ad') 
 
 if   args.initialisation=='PCA':
 
     Trained=run_model(adata)
-    
-    # Trained.__dict__['_raw'].__dict__['_var']=\
-    #                                         Trained.__dict__['_raw'].__dict__['_var'].rename(columns={'_index': 'features'})
-    
-    Trained.write_h5ad('/home/jupyter/GPLVM_Shaista/TrainedModels/Scaled/' + args.output + '.h5ad')
+
+#     Trained.__dict__['_raw'].__dict__['_var']=\
+#                                             Trained.__dict__['_raw'].__dict__['_var'].rename(columns={'_index': 'features'})
+
+    Trained.write_h5ad('/home/jupyter/GPLVM_Shaista/ScaledVsUnscaled/Scaled/' + args.output + '.h5ad')
 
 
 

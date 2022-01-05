@@ -50,7 +50,7 @@ def run_model(adata):
     adata.layers['log_norm_count'] = adata.X.copy()
     sc.pp.highly_variable_genes(adata,n_top_genes=2000)
     adata = adata[:, adata.var['highly_variable']].copy()  #slicing of anndata object needs copy 
-    sc.pp.scale(adata,zero_center=True)
+    sc.pp.scale(adata,zero_center=False )
     adata.X= sparse.csr_matrix(adata.X)
     sc.pp.pca(adata) ## this runs PCA on the scaled matrix and uses hvg
     adata.X = adata.layers['log_norm_count'].copy()
@@ -243,7 +243,7 @@ def run_model_randomInit(adata):
     adata.layers['log_norm_count'] = adata.X.copy()
     sc.pp.highly_variable_genes(adata,n_top_genes=2000)
     adata = adata[:, adata.var['highly_variable']].copy()  #slicing of anndata object needs copy 
-    sc.pp.scale(adata,zero_center=True)
+    sc.pp.scale(adata,zero_center=False)
     adata.X= sparse.csr_matrix(adata.X.copy())
     sc.pp.pca(adata) ## this runs PCA on the scaled matrix and uses hvg
     adata.X = adata.layers['log_norm_count'].copy()
